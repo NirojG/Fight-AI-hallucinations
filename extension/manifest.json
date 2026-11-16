@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "AI Hallucination Review",
+  "version": "0.1.0",
+  "description": "Check AI replies against evidence and prepare a recovery prompt.",
+  "permissions": ["activeTab", "scripting", "clipboardWrite"],
+  "action": {
+    "default_title": "Review AI answer",
+    "default_popup": "popup.html"
+  }
+}
