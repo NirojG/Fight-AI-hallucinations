@@ -1,0 +1,10 @@
+{
+  "name": "fight-ai-hallucinations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check extension/popup.js && node --check extension/core/inspect.js && node --check extension/core/recovery.js"
+  }
+}
