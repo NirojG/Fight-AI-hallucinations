@@ -30,10 +30,19 @@ function fieldsFrom(text) {
   return fields;
 }
 
-function findingsForFields(answer, evidence) {
+function findingsForFields(answer, evidence, context) {
   const findings = [];
   for (const [key, { label, values }] of fieldsFrom(answer)) {
-    const verified = fieldsFromEvidence(evidence, key);
+    const verified = [...(evidence.get(key)?.values ?? [])];
+    const previous = context.get(key);
+    if (!verified.length && previous?.values.size === 1 && key !== "always include") {
+      const expected = [...previous.values];
+      const mismatches = [...values].filter(value => value !== expected[0]);
+      if (mismatches.length) findings.push({
+        kind: "context-mismatch", label, observed: mismatches, evidence: expected,
+        message: "The answer differs from the latest value supplied by the user.",
+      });
+    }
     if (verified.length > 1) {
       findings.push({
         kind: "conflicting-evidence", label, observed: [...values], evidence: verified,
@@ -58,8 +67,25 @@ function findingsForFields(answer, evidence) {
   return findings;
 }
 
-function fieldsFromEvidence(evidence, key) {
-  return [...(evidence.get(key)?.values ?? [])];
+function userContext(turns) {
+  const context = new Map();
+  for (const turn of turns) {
+    if (turn?.role !== "user" || typeof turn.text !== "string") continue;
+    for (const [key, field] of fieldsFrom(turn.text)) context.set(key, field);
+  }
+  return context;
+}
+
+function findMissingRequirement(answer, context, evidence) {
+  const requirement = evidence.get("always include") ?? context.get("always include");
+  if (requirement?.values.size !== 1) return [];
+  const [expected] = requirement.values;
+  const normalized = text => text.normalize("NFKC").toLowerCase().replace(/\s+/g, " ");
+  if (normalized(expected) === "none" || normalized(answer).includes(normalized(expected))) return [];
+  return [{
+    kind: "missing-context", label: "Always include", observed: [], evidence: [expected],
+    message: "The required phrase is missing from the reply.",
+  }];
 }
 
 function findingsForActions(answer, verifiedActions) {
@@ -91,13 +117,16 @@ function findingsForActions(answer, verifiedActions) {
  * Compare the latest answer with trusted field/value lines and caller-confirmed actions.
  * A finding is a review signal. An empty result means the checks found no matching issue.
  */
-export function inspectAnswer({ answer, evidence = "", verifiedActions = [] }) {
+export function inspectAnswer({ answer, evidence = "", verifiedActions = [], turns = [] }) {
   if (typeof answer !== "string" || !answer.trim()) throw new TypeError("Enter an AI answer to check.");
-  if (typeof evidence !== "string" || !Array.isArray(verifiedActions)) {
-    throw new TypeError("Evidence must be text and verified actions must be an array.");
+  if (typeof evidence !== "string" || !Array.isArray(verifiedActions) || !Array.isArray(turns)) {
+    throw new TypeError("Evidence must be text. Verified actions and turns must be arrays.");
   }
+  const verified = fieldsFrom(evidence);
+  const context = userContext(turns);
   const findings = [
-    ...findingsForFields(answer, fieldsFrom(evidence)),
+    ...findingsForFields(answer, verified, context),
+    ...findMissingRequirement(answer, context, verified),
     ...findingsForActions(answer, verifiedActions),
   ];
   return { status: findings.length ? "review" : "no-signals", findings };

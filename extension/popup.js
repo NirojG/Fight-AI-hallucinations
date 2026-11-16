@@ -79,13 +79,14 @@ form.addEventListener("submit", event => {
     return;
   }
   const verifiedActions = new FormData(form).getAll("action");
-  const review = inspectAnswer({ answer: answer.value, evidence: evidence.value, verifiedActions });
+  const turns = captured?.turns ?? [];
+  const review = inspectAnswer({ answer: answer.value, evidence: evidence.value, verifiedActions, turns });
   lastReview = {
     answer: answer.value,
     evidence: evidence.value,
     verifiedActions,
     findings: review.findings,
-    turns: captured?.turns ?? [],
+    turns,
     omittedTurns: captured?.omittedTurns ?? 0,
   };
 
@@ -104,7 +105,9 @@ form.addEventListener("submit", event => {
     if (finding.kind !== "unverified-action") {
       const values = document.createElement("small");
       const evidenceText = finding.evidence.length ? " · Evidence: " + finding.evidence.join(" / ") : "";
-      values.textContent = "Reply: " + finding.observed.join(" / ") + evidenceText;
+      values.textContent = finding.observed.length
+        ? "Reply: " + finding.observed.join(" / ") + evidenceText
+        : "Required: " + finding.evidence.join(" / ");
       item.append(values);
     }
     return item;
