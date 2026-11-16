@@ -1,6 +1,6 @@
 import { inspectAnswer } from "./core/inspect.js";
 import { buildRecoveryPrompt } from "./core/recovery.js";
-import { captureChatGPT } from "./capture.js";
+import { captureConversation } from "./capture.js";
 
 const byId = id => document.getElementById(id);
 const form = byId("review");
@@ -47,11 +47,11 @@ captureButton.addEventListener("click", async () => {
   captureButton.disabled = true;
   captureStatus.textContent = "Reading visible conversation…";
   try {
-    const conversation = await captureChatGPT();
+    const conversation = await captureConversation();
     if (version !== captureVersion) return;
     captured = conversation;
     answer.value = conversation.answer;
-    captureStatus.textContent = "Reply loaded. Earlier visible turns can be included in the handoff.";
+    captureStatus.textContent = conversation.platform + " reply loaded. Earlier visible turns can be included in the handoff.";
     clearReview();
   } catch (error) {
     if (version === captureVersion) captureStatus.textContent = error.message;
@@ -74,7 +74,7 @@ byId("example").addEventListener("click", () => {
 form.addEventListener("submit", event => {
   event.preventDefault();
   if (!answer.value.trim()) {
-    captureStatus.textContent = "Paste an AI reply or load one from ChatGPT.";
+    captureStatus.textContent = "Paste an AI reply or read the current chat.";
     answer.focus();
     return;
   }

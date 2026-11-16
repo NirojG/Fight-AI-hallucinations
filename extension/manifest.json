@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AI Hallucination Review",
+  "name": "Fight Hallucination",
   "version": "0.1.0",
   "description": "Check AI replies against evidence and prepare a recovery prompt.",
   "permissions": ["activeTab", "scripting", "clipboardWrite"],
