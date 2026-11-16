@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Hallucination Review</title>
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <span class="mark" aria-hidden="true">↺</span>
+      <div>
+        <h1>AI Hallucination Review</h1>
+        <p>Check a reply before building on it.</p>
+      </div>
+    </header>
+
+    <form id="review">
+      <section class="panel" aria-label="Reply and evidence">
+        <div class="toolbar">
+          <button type="button" id="capture">Read ChatGPT tab</button>
+          <button type="button" id="example">Try an example</button>
+        </div>
+        <p class="message" id="capture-status" role="status"></p>
+        <label for="answer">AI reply</label>
+        <textarea id="answer" rows="4" maxlength="60000" required placeholder="Paste a reply from any AI tool"></textarea>
+        <label for="evidence">Verified facts <span>optional</span></label>
+        <textarea id="evidence" rows="3" maxlength="8000" placeholder="API port: 3000&#10;Release branch: dev"></textarea>
+        <fieldset>
+          <legend>Actions you confirmed <span>optional</span></legend>
+          <label><input type="checkbox" name="action" value="push"> Push</label>
+          <label><input type="checkbox" name="action" value="deploy"> Deploy</label>
+          <label><input type="checkbox" name="action" value="test"> Tests</label>
+        </fieldset>
+        <button class="primary" type="submit">Check reply</button>
+      </section>
+    </form>
+
+    <section class="panel" id="results" aria-labelledby="result-title" hidden>
+      <h2 id="result-title" tabindex="-1"></h2>
+      <p id="result-detail"></p>
+      <ul id="findings"></ul>
+      <details id="recovery">
+        <summary>Prepare a fresh-chat handoff</summary>
+        <label for="goal">What should the next chat do? <span>optional</span></label>
+        <input id="goal" maxlength="2000" placeholder="Finish the release and verify the push">
+        <label for="prompt">Recovery prompt</label>
+        <textarea id="prompt" rows="6" readonly></textarea>
+        <div class="toolbar">
+          <button type="button" id="copy">Copy recovery prompt</button>
+          <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open fresh ChatGPT chat</a>
+        </div>
+        <p class="message" id="copy-status" role="status"></p>
+      </details>
+    </section>
+    <footer>Review runs locally in your browser.</footer>
+  </main>
+</body>
+</html>
