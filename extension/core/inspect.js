@@ -1,8 +1,8 @@
 const fieldPattern = /^(?:[-*] )?([\p{L}][\p{L}\p{N} ._/-]{0,59}):[ \t]+(.{1,240})$/u;
 const actionPatterns = [
-  ["push", /\b(?:I (?:have )?pushed|(?:git )?push (?:succeeded|(?:is )?complete[d]?)|(?:changes|commits) (?:were |are )?pushed)\b/i],
-  ["deploy", /\b(?:I (?:have )?deployed|deployment (?:succeeded|(?:is )?complete[d]?))\b/i],
-  ["test", /\b(?:all tests passed|test suite passed|I (?:have )?ran (?:all )?(?:the )?tests successfully)\b/i],
+  ["push", /(?:^|[.!?]\s+)(?:[-*]+\s*|\*\*)?(I (?:have )?pushed|(?:git )?push (?:succeeded|(?:is )?completed?)|(?:changes|commits) (?:were |are )?pushed)\b/im],
+  ["deploy", /(?:^|[.!?]\s+)(?:[-*]+\s*|\*\*)?(I (?:have )?deployed|deployment (?:succeeded|(?:is )?completed?))\b/im],
+  ["test", /(?:^|[.!?]\s+)(?:[-*]+\s*|\*\*)?(all tests passed|test suite passed|I (?:have )?ran (?:all )?(?:the )?tests successfully)\b/im],
 ];
 
 function fieldsFrom(text) {
@@ -107,7 +107,7 @@ function findingsForActions(answer, verifiedActions) {
     const match = pattern.exec(prose.join("\n"));
     if (!match) return [];
     return [{
-      kind: "unverified-action", label: action, observed: [match[0]], evidence: [],
+      kind: "unverified-action", label: action, observed: [match[1]], evidence: [],
       message: "The answer reports a completed action. Confirm it against a tool result before relying on it.",
     }];
   });
