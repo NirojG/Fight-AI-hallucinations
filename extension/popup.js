@@ -81,6 +81,7 @@ form.addEventListener("submit", event => {
   const verifiedActions = new FormData(form).getAll("action");
   const review = inspectAnswer({ answer: answer.value, evidence: evidence.value, verifiedActions });
   lastReview = {
+    answer: answer.value,
     evidence: evidence.value,
     verifiedActions,
     findings: review.findings,
